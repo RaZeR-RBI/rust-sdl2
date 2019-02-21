@@ -942,6 +942,7 @@ impl Event {
                     which: which,
                     x: x,
                     y: y,
+#[cfg(feature = "use_latest")]
                     direction : direction.to_ll(),
                 };
                 unsafe {
@@ -1376,7 +1377,10 @@ impl Event {
                     which: event.which,
                     x: event.x,
                     y: event.y,
+#[cfg(feature = "use_latest")]
                     direction: mouse::MouseWheelDirection::from_ll(event.direction),
+#[cfg(not(feature = "use_latest"))]
+                    direction: mouse::MouseWheelDirection::Unknown(0),
                 }
             }
 
@@ -1583,7 +1587,10 @@ impl Event {
 
                 Event::DropFile {
                     timestamp: event.timestamp,
+#[cfg(feature = "use_latest")]
                     window_id: event.windowID,
+#[cfg(not(feature = "use_latest"))]
+                    window_id: 0,
                     filename: text
                 }
             }

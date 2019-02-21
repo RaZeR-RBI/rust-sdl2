@@ -577,16 +577,19 @@ impl<'a, Channel: AudioFormatNum> AudioQueue<Channel> {
     }
 
     /// Adds data to the audio queue.
+#[cfg(feature = "use_latest")]
     pub fn queue(&self, data: &[Channel]) -> bool {
         let result = unsafe {sys::SDL_QueueAudio(self.device_id.id(), data.as_ptr() as *const c_void, (data.len() * mem::size_of::<Channel>()) as u32)};
         result == 0
     }
 
+#[cfg(feature = "use_latest")]
     pub fn size(&self) -> u32 {
         unsafe {sys::SDL_GetQueuedAudioSize(self.device_id.id())}
     }
 
     /// Clears all data from the current audio queue.
+#[cfg(feature = "use_latest")]
     pub fn clear(&self) {
         unsafe {sys::SDL_ClearQueuedAudio(self.device_id.id());}
     }

@@ -414,6 +414,7 @@ impl GameController {
     /// the rumble effect to keep playing for a long time, as this results in
     /// the effect ending immediately after starting due to an overflow.
     /// Use some smaller, "huge enough" number instead.
+#[cfg(feature = "use_latest")]
     pub fn set_rumble(&mut self,
                       low_frequency_rumble: u16,
                       high_frequency_rumble: u16,

@@ -368,6 +368,7 @@ impl MouseUtil {
         unsafe { sys::SDL_ShowCursor(show as i32); }
     }
 
+#[cfg(feature = "use_latest")]
     pub fn capture(&self, enable: bool) {
         let enable = if enable { sys::SDL_bool::SDL_TRUE } else { sys::SDL_bool::SDL_FALSE };
         unsafe { sys::SDL_CaptureMouse(enable); }

@@ -92,6 +92,7 @@ impl JoystickSubsystem {
 
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[repr(i32)]
+#[cfg(feature = "use_latest")]
 pub enum PowerLevel {
     Unknown = sys::SDL_JoystickPowerLevel::SDL_JOYSTICK_POWER_UNKNOWN as i32,
     Empty   = sys::SDL_JoystickPowerLevel::SDL_JOYSTICK_POWER_EMPTY as i32,
@@ -101,6 +102,7 @@ pub enum PowerLevel {
     Wired   = sys::SDL_JoystickPowerLevel::SDL_JOYSTICK_POWER_WIRED as i32,
 }
 
+#[cfg(feature = "use_latest")]
 impl PowerLevel {
     pub fn from_ll(raw: sys::SDL_JoystickPowerLevel) -> PowerLevel {
         match raw {
@@ -177,6 +179,7 @@ impl Joystick {
     }
 
     /// Retrieve the battery level of this joystick
+    #[cfg(feature = "use_latest")]
     pub fn power_level(&self) -> Result<PowerLevel, IntegerOrSdlError> {
         use common::IntegerOrSdlError::*;
         clear_error();
@@ -356,6 +359,7 @@ impl Joystick {
     /// the rumble effect to keep playing for a long time, as this results in
     /// the effect ending immediately after starting due to an overflow.
     /// Use some smaller, "huge enough" number instead.
+    #[cfg(feature = "use_latest")]
     pub fn set_rumble(&mut self,
                       low_frequency_rumble: u16,
                       high_frequency_rumble: u16,

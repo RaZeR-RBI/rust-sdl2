@@ -41,6 +41,7 @@ optional = true
 
 [build-dependencies]
 cfg-if = "^0.1"
+lazy_static = "1.2.0"
 
 [features]
 

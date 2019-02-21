@@ -15,12 +15,14 @@ extern crate unidiff;
 
 #[macro_use]
 extern crate cfg_if;
+#[macro_use]
+extern crate lazy_static;
 
 use std::path::{Path, PathBuf};
 use std::{io, fs, env};
 
 // corresponds to the headers that we have in sdl2-sys/SDL2-{version}
-const SDL2_HEADERS_BUNDLED_VERSION: &str = "2.0.9";
+const SDL2_HEADERS_BUNDLED_VERSION: &str = "2.0.2";
 
 // means the lastest stable version that can be downloaded from SDL2's source
 const LASTEST_SDL2_VERSION: &str = "2.0.9";
@@ -523,6 +525,35 @@ fn copy_pregenerated_bindings() {
 }
 
 #[cfg(feature = "bindgen")]
+#[derive(Debug)]
+struct IgnoreMacros<'a>(&'a std::collections::HashSet<String>);
+
+#[cfg(feature = "bindgen")]
+impl<'a> bindgen::callbacks::ParseCallbacks for IgnoreMacros<'a> {
+    fn will_parse_macro(&self, name: &str) -> bindgen::callbacks::MacroParsingBehavior {
+        if self.0.contains(name) {
+            bindgen::callbacks::MacroParsingBehavior::Ignore
+        } else {
+            bindgen::callbacks::MacroParsingBehavior::Default
+        }
+    }
+}
+
+#[cfg(feature = "bindgen")]
+lazy_static! {
+    static ref ignored_macros: std::collections::HashSet<String> =
+        vec![
+            "FP_NAN".into(),
+            "FP_INFINITE".into(),
+            "FP_ZERO".into(),
+            "FP_SUBNORMAL".into(),
+            "FP_NORMAL".into(),
+        ]
+        .into_iter()
+        .collect();
+}
+
+#[cfg(feature = "bindgen")]
 // headers_path is a list of directories where the SDL2 headers are expected
 // to be found by bindgen (should point to the include/ directories)
 fn generate_bindings<S: AsRef<str> + ::std::fmt::Debug>(target: &str, host: &str, headers_paths: &[S]) {
@@ -666,6 +697,7 @@ fn generate_bindings<S: AsRef<str> + ::std::fmt::Debug>(target: &str, host: &str
         }
     }
 
+
     let bindings = bindings
         .header("wrapper.h")
         .rustified_enum(".*")
@@ -675,6 +707,7 @@ fn generate_bindings<S: AsRef<str> + ::std::fmt::Debug>(target: &str, host: &str
         .blacklist_type("FP_SUBNORMAL")
         .blacklist_type("FP_NORMAL")
         .blacklist_type("max_align_t") // Until https://github.com/rust-lang-nursery/rust-bindgen/issues/550 gets fixed
+        .parse_callbacks(Box::new(IgnoreMacros(&ignored_macros)))
         .derive_debug(false)
         .generate()
         .expect("Unable to generate bindings!");
@@ -699,6 +732,7 @@ fn generate_bindings<S: AsRef<str> + ::std::fmt::Debug>(target: &str, host: &str
             .whitelist_var("IMG.*")
             .blacklist_type("SDL_.*")
             .blacklist_type("_IO.*|FILE")
+            .parse_callbacks(Box::new(IgnoreMacros(&ignored_macros)))
             .generate()
             .expect("Unable to generate image_bindings!");
 
@@ -722,6 +756,7 @@ fn generate_bindings<S: AsRef<str> + ::std::fmt::Debug>(target: &str, host: &str
             .whitelist_var("TTF.*")
             .blacklist_type("SDL_.*")
             .blacklist_type("_IO.*|FILE")
+            .parse_callbacks(Box::new(IgnoreMacros(&ignored_macros)))
             .generate()
             .expect("Unable to generate ttf_bindings!");
 
@@ -748,6 +783,7 @@ fn generate_bindings<S: AsRef<str> + ::std::fmt::Debug>(target: &str, host: &str
             .whitelist_var("MUS.*")
             .blacklist_type("SDL_.*")
             .blacklist_type("_IO.*|FILE")
+            .parse_callbacks(Box::new(IgnoreMacros(&ignored_macros)))
             .generate()
             .expect("Unable to generate mixer_bindings!");
 
@@ -770,6 +806,7 @@ fn generate_bindings<S: AsRef<str> + ::std::fmt::Debug>(target: &str, host: &str
             .whitelist_function("SDL_.*rame.*")
             .whitelist_var("FPS.*")
             .blacklist_type("_IO.*|FILE")
+            .parse_callbacks(Box::new(IgnoreMacros(&ignored_macros)))
             .generate()
             .expect("Unable to generate gfx_framerate_bindings!");
 
@@ -806,6 +843,7 @@ fn generate_bindings<S: AsRef<str> + ::std::fmt::Debug>(target: &str, host: &str
             .whitelist_function("string.*")
             .whitelist_function("gfx.*")
             .blacklist_type("_IO.*|FILE")
+            .parse_callbacks(Box::new(IgnoreMacros(&ignored_macros)))
             .generate()
             .expect("Unable to generate gfx_primitives_bindings!");
 
@@ -824,6 +862,7 @@ fn generate_bindings<S: AsRef<str> + ::std::fmt::Debug>(target: &str, host: &str
             .blacklist_type("FP_SUBNORMAL")
             .blacklist_type("FP_NORMAL")
             .blacklist_type("_IO.*|FILE")
+            .parse_callbacks(Box::new(IgnoreMacros(&ignored_macros)))
             .generate()
             .expect("Unable to generate gfx_imagefilter_bindings!");
 
@@ -846,6 +885,7 @@ fn generate_bindings<S: AsRef<str> + ::std::fmt::Debug>(target: &str, host: &str
             .blacklist_type("FP_SUBNORMAL")
             .blacklist_type("FP_NORMAL")
             .blacklist_type("_IO.*|FILE")
+            .parse_callbacks(Box::new(IgnoreMacros(&ignored_macros)))
             .generate()
             .expect("Unable to generate gfx_rotozoom_bindings!");
 

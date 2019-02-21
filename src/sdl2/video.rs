@@ -18,6 +18,7 @@ use get_error;
 
 use sys;
 
+#[cfg(feature = "use_latest")]
 pub use sys::{VkInstance, VkSurfaceKHR};
 
 
@@ -687,6 +688,7 @@ impl VideoSubsystem {
 
     /// Return a triplet `(ddpi, hdpi, vdpi)` containing the diagonal, horizontal and vertical
     /// dots/pixels-per-inch of a display
+    #[cfg(feature = "use_latest")]
     pub fn display_dpi(&self, display_index: i32) -> Result<(f32, f32, f32), String> {
         let mut ddpi = 0.0;
         let mut hdpi = 0.0;
@@ -816,6 +818,7 @@ impl VideoSubsystem {
     /// If no Vulkan library is loaded, the default library will be loaded upon creation of the first Vulkan window.
     ///
     /// If a different library is already loaded, this function will return an error.
+    #[cfg(feature = "use_latest")]
     pub fn vulkan_load_library_default(&self) -> Result<(), String> {
         unsafe {
             if sys::SDL_Vulkan_LoadLibrary(ptr::null()) == 0 {
@@ -832,6 +835,7 @@ impl VideoSubsystem {
     /// If no Vulkan library is loaded, the default library will be loaded upon creation of the first Vulkan window.
     ///
     /// If a different library is already loaded, this function will return an error.
+    #[cfg(feature = "use_latest")]
     pub fn vulkan_load_library<P: AsRef<::std::path::Path>>(&self, path: P) -> Result<(), String> {
         unsafe {
             // TODO: use OsStr::to_cstring() once it's stable
@@ -848,6 +852,7 @@ impl VideoSubsystem {
     ///
     /// To completely unload the library, this should be called for every successful load of the
     /// Vulkan library.
+    #[cfg(feature = "use_latest")]
     pub fn vulkan_unload_library(&self) {
         unsafe { sys::SDL_Vulkan_UnloadLibrary(); }
     }
@@ -856,6 +861,7 @@ impl VideoSubsystem {
     /// [`vkGetInstanceProcAddr`](https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkGetInstanceProcAddr.html)
     /// Vulkan function. This function can be called to retrieve the address of other Vulkan
     /// functions.
+    #[cfg(feature = "use_latest")]
     pub fn vulkan_get_proc_address_function(&self) -> Result<*const (), String> {
         let result = unsafe { sys::SDL_Vulkan_GetVkGetInstanceProcAddr() as *const () };
         if result.is_null() {
@@ -1005,6 +1011,7 @@ impl WindowBuilder {
     }
 
     /// Sets the window to be usable with a Vulkan instance
+    #[cfg(feature = "use_latest")]
     pub fn vulkan(&mut self) -> & mut WindowBuilder {
         self.window_flags |= sys::SDL_WindowFlags::SDL_WINDOW_VULKAN as u32;
         self
@@ -1128,6 +1135,7 @@ impl Window {
     }
 
     /// Get the names of the Vulkan instance extensions needed to create a surface with `vulkan_create_surface`.
+    #[cfg(feature = "use_latest")]
     pub fn vulkan_instance_extensions(&self) -> Result<Vec<&'static str>, String> {
         let mut count: c_uint = 0;
         if unsafe { sys::SDL_Vulkan_GetInstanceExtensions(self.context.raw, &mut count, ptr::null_mut()) } == sys::SDL_bool::SDL_FALSE {
@@ -1145,6 +1153,7 @@ impl Window {
     /// The `VkInstance` must be created using a prior call to the
     /// [`vkCreateInstance`](https://www.khronos.org/registry/vulkan/specs/1.1-extensions/man/html/vkCreateInstance.html)
     /// function in the Vulkan library.
+    #[cfg(feature = "use_latest")]
     pub fn vulkan_create_surface(&self, instance: VkInstance) -> Result<VkSurfaceKHR, String> {
         let mut surface: VkSurfaceKHR = 0;
         if unsafe { sys::SDL_Vulkan_CreateSurface(self.context.raw, instance, &mut surface) } == sys::SDL_bool::SDL_FALSE {
@@ -1253,6 +1262,7 @@ impl Window {
     ///
     /// # Remarks
     /// This function is only supported on X11, otherwise an error is returned.
+    #[cfg(feature = "use_latest")]
     pub fn border_size(&self) -> Result<(u16, u16, u16, u16), String> {
         let mut top: c_int = 0;
         let mut left: c_int = 0;
@@ -1289,6 +1299,7 @@ impl Window {
         (w as u32, h as u32)
     }
 
+    #[cfg(feature = "use_latest")]
     pub fn vulkan_drawable_size(&self) -> (u32, u32) {
         let mut w: c_int = 0;
         let mut h: c_int = 0;
